@@ -1,0 +1,73 @@
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import useSocket from "./useSocket"; // Hook personalizado para conectar a un solo canal
+
+// Componente interno que se encarga de conectar a una especialidad
+function SingleSocket({ speciality, onMessage, registerSendMessage }) {
+  const { data, sendMessage } = useSocket(`ExternalConsultationArrival_${speciality}`);
+
+  useEffect(() => {
+    if (data) {
+      onMessage(data);
+    }
+  }, [data, onMessage]);
+
+  useEffect(() => {
+    if (sendMessage) {
+      registerSendMessage(speciality, sendMessage);
+    }
+  }, [sendMessage, registerSendMessage, speciality]);
+
+  return null;
+}
+
+// Componente que engloba todos los sockets activos
+function MultiSocketComponents({ specialities, onMessage, registerSendMessage }) {
+  return (
+    <>
+      {specialities.map((spec) => (
+        <SingleSocket
+          key={spec}
+          speciality={spec}
+          onMessage={onMessage}
+          registerSendMessage={registerSendMessage}
+        />
+      ))}
+    </>
+  );
+}
+
+// Hook principal para múltiples especialidades
+export default function useMultiSocket(specialities = [], onMessages) {
+  const [allMessages, setAllMessages] = useState({});
+  const sendMessageMap = useRef({}); // Map de funciones sendMessage
+
+  // Registrar una función sendMessage
+  const registerSendMessage = useCallback((speciality, fn) => {
+    sendMessageMap.current[speciality] = fn;
+  }, []);
+
+  // Enviar mensaje a una especialidad específica
+  const sendMessage = useCallback((speciality, message) => {
+    const fn = sendMessageMap.current[speciality];
+    if (fn) {
+      fn(message);
+    } else {
+      console.warn(`No hay función de envío para la especialidad: ${speciality}`);
+    }
+  }, []);
+
+  // La función onMessages pasada la usamos directamente para manejar mensajes
+  const handleMessage = onMessages;
+
+  return {
+    allMessages,
+    sendMessage,
+    MultiSocketComponents: (
+      <MultiSocketComponents
+        specialities={specialities}
+        onMessage={handleMessage}
+        registerSendMessage={registerSendMessage}
+      />
+    ),
+  };
+}
