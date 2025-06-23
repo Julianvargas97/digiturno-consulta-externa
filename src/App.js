@@ -12,7 +12,7 @@ function App() {
         <Route path="/PatientArrival" element={<PatientArrival />} />
         <Route path="/facturacion" element={<Facturacion />} />
         <Route path="/call-pacientes" element={<CallPacientes />} /> 
-        <Route path="*" element={<Navigate to="/PatientArrival" replace />} />
+        <Route path="*" element={<Navigate to="/call-pacientes" replace />} />
       </Routes>
     </Router>
   );

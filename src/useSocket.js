@@ -12,7 +12,7 @@ export const DestSocket = {
   ExternalConsultationArrival_QR: 'ExternalConsultationArrival_QR',
   ExternalConsultationArrival_CIRUGIA_PROGRAMADA: 'ExternalConsultationArrival_CIRUGIA_PROGRAMADA',
   ExternalConsultationArrival_SOAT: 'ExternalConsultationArrival_SOAT',
-  ExternalConsultationArrival_ARI: 'ExternalConsultationArrival_ARI',
+  ExternalConsultationArrival_ARL: 'ExternalConsultationArrival_ARL',
   ExternalConsultationArrival_GENERAL: 'ExternalConsultationArrival_GENERAL',
   ExternalConsultationArrival_MEDICINA_PREPAGADA: 'ExternalConsultationArrival_MEDICINA_PREPAGADA',
   ExternalConsultationArrival_PRUEBAS_MAGISTRALES: 'ExternalConsultationArrival_PRUEBAS_MAGISTRALES',
@@ -39,7 +39,7 @@ const topicRoutes = {
   [DestSocket.ExternalConsultationArrival_QR]: '/topic/external-consultation/arrival-confirmation/QR',
   [DestSocket.ExternalConsultationArrival_CIRUGIA_PROGRAMADA]: '/topic/external-consultation/arrival-confirmation/CIRUGIA_PROGRAMADA',
   [DestSocket.ExternalConsultationArrival_SOAT]: '/topic/external-consultation/arrival-confirmation/SOAT',
-  [DestSocket.ExternalConsultationArrival_ARI]: '/topic/external-consultation/arrival-confirmation/ARI',
+  [DestSocket.ExternalConsultationArrival_ARL]: '/topic/external-consultation/arrival-confirmation/ARL',
   [DestSocket.ExternalConsultationArrival_GENERAL]: '/topic/external-consultation/arrival-confirmation/GENERAL',
   [DestSocket.ExternalConsultationArrival_MEDICINA_PREPAGADA]: '/topic/external-consultation/arrival-confirmation/MEDICINA_PREPAGADA',
   [DestSocket.ExternalConsultationArrival_PRUEBAS_MAGISTRALES]: '/topic/external-consultation/arrival-confirmation/PRUEBAS_MAGISTRALES',
@@ -56,7 +56,7 @@ const topicRoutes = {
 };
 
 // URL del servidor WebSocket
-const url = 'ws://192.168.17.236:5000/websocket';
+const url = 'ws://192.168.137.155:5000/websocket';
 
 // Hook personalizado para manejar la conexión WebSocket
 const useSocket = (destSocket) => {

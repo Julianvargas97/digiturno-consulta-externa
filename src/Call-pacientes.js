@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import fondo from "./HUSJ.jpeg";
 import logo from "./logo.png";
 import Telemedicina from "./Telemedicina.png";
-import logo3 from "./logo3.png";
 import Facturacion from "./Facturacion.jpeg";
 import sonidoTurno from "./sonido.mp3";
 import "./Call-pacientes.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import useSocket, { DestSocket } from "./useSocket";
 
@@ -56,6 +54,15 @@ const frases = [
   }
 ];
 
+
+// Cola de mensajes para la síntesis de voz y audio
+
+
+// Aquí guardamos los mensajes en cola para reproducir
+const colaDeMensajes = [];
+// Indicador si ya se está reproduciendo un mensaje (audio + síntesis)
+let reproduciendo = false;
+
 function CallPacientes() {
   const [turnos, setTurnos] = useState([]);
   const [horaActual, setHoraActual] = useState(new Date());
@@ -64,11 +71,13 @@ function CallPacientes() {
   const [mostrarLogo, setMostrarLogo] = useState(true);
   const { data } = useSocket(DestSocket.ExternalConsultationArrival_ANOUNCETOBILLING);
 
+  // Actualiza reloj cada segundo
   useEffect(() => {
     const reloj = setInterval(() => setHoraActual(new Date()), 1000);
     return () => clearInterval(reloj);
   }, []);
 
+  // Limpia turnos viejos (más de 5 minutos) y limita máximo 10 turnos
   useEffect(() => {
     const limpiarTurnos = setInterval(() => {
       const ahora = Date.now();
@@ -84,6 +93,49 @@ function CallPacientes() {
     return () => clearInterval(limpiarTurnos);
   }, []);
 
+  // Función que maneja la reproducción secuencial de audio y síntesis
+  function reproducirMensaje(mensaje) {
+    if (reproduciendo) {
+      // Si la cola ya está llena, descartamos para no saturar
+      if (colaDeMensajes.length >= 60) {
+        console.warn("Cola de mensajes llena, mensaje descartado:", mensaje);
+        return;
+      }
+      // Añadimos el mensaje a la cola
+      colaDeMensajes.push(mensaje);
+      return;
+    }
+
+    reproduciendo = true;
+
+    // Reproducimos el sonido de aviso primero
+    const audio1 = new Audio(sonidoTurno);
+    audio1.volume = 1.0;
+    audio1.play().then(() => {
+      setTimeout(() => {
+        // Luego hacemos la síntesis de voz
+        const utterance = new SpeechSynthesisUtterance(mensaje);
+        const voces = speechSynthesis.getVoices();
+        const vozColombiana = voces.find((v) => v.lang === "es-CO");
+        utterance.voice = vozColombiana || voces.find(v => v.lang.startsWith("es")) || null;
+        utterance.rate = 1;
+        utterance.pitch = 1;
+
+        // Cuando termine la síntesis, chequeamos la cola para reproducir siguiente
+        utterance.onend = () => {
+          reproduciendo = false;
+          if (colaDeMensajes.length > 0) {
+            const siguiente = colaDeMensajes.shift();
+            reproducirMensaje(siguiente);
+          }
+        };
+
+        speechSynthesis.speak(utterance);
+      }, 500); // pequeño delay para que no se solapen audio y voz
+    });
+  }
+
+  // Cuando llega un nuevo turno por socket
   useEffect(() => {
     if (data && data.turn && data.attentionModule) {
       const nuevoTurno = {
@@ -93,34 +145,17 @@ function CallPacientes() {
         patientName: data.patientName || "",
       };
 
-      const reproducirSonidoYHablar = () => {
-        const audio1 = new Audio(sonidoTurno);
-        audio1.volume = 1.0;
-        audio1.play().then(() => {
-          setTimeout(() => {
-            const audio2 = new Audio(sonidoTurno);
-            audio2.volume = 1.0;
-            audio2.play().then(() => {
-              setTimeout(() => {
-                const mensaje = `${data.patientName} con Turno ${data.turn}, por favor dirigirse al ${data.attentionModule}`;
-                const utterance = new SpeechSynthesisUtterance(mensaje);
-                const voces = speechSynthesis.getVoices();
-                const vozColombiana = voces.find((v) => v.lang === "es-CO");
-                utterance.voice = vozColombiana || voces.find(v => v.lang.startsWith("es")) || null;
-                utterance.rate = 1;
-                utterance.pitch = 1;
-                speechSynthesis.speak(utterance);
-              }, 500);
-            });
-          }, 2900);
-        });
-      };
+      // Texto que se va a reproducir en la síntesis
+      const mensaje = `${data.patientName} con Turno ${data.turn}, por favor dirigirse al modulo ${data.attentionModule.replace("_", " ")}`;
 
-      reproducirSonidoYHablar();
+      // Reproducimos con control de cola
+      reproducirMensaje(mensaje);
 
+      // Efecto visual de resaltado
       setResaltar(true);
       setTimeout(() => setResaltar(false), 6000);
 
+      // Actualizamos lista de turnos (evita duplicados)
       setTurnos((prev) => {
         const sinAnterior = prev.filter(
           (t) => !(t.turno === nuevoTurno.turno && t.modulo === nuevoTurno.modulo)
@@ -130,6 +165,7 @@ function CallPacientes() {
     }
   }, [data]);
 
+  // Rota turnos para mostrar siempre los más recientes arriba y resaltar el primero
   useEffect(() => {
     const rotar = setInterval(() => {
       if (turnos.length > 1) {
@@ -146,6 +182,7 @@ function CallPacientes() {
     return () => clearInterval(rotar);
   }, [turnos]);
 
+  // Cambia las frases rotativas en la pantalla izquierda
   useEffect(() => {
     const cambiarFrase = setInterval(() => {
       setIndiceFrase((prev) => (prev + 1) % frases.length);
@@ -153,18 +190,20 @@ function CallPacientes() {
     return () => clearInterval(cambiarFrase);
   }, []);
 
+  // Control para animar el logo al cambiar de frase
   useEffect(() => {
     setMostrarLogo(false);
     const timeoutId = setTimeout(() => setMostrarLogo(true), 300);
     return () => clearTimeout(timeoutId);
   }, [indiceFrase]);
 
+  // Formateo de fecha y hora para mostrar arriba
   const formatoFechaHora = (fecha) => {
     if (!fecha) return "";
     const dia = String(fecha.getDate()).padStart(2, "0");
     const mesNumero = fecha.getMonth();
-    const hora = fecha.toLocaleTimeString("en-US", {
-      hour: "2-digit",
+    const hora = fecha.toLocaleTimeString("es-CO", {
+      hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });

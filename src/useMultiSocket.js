@@ -5,12 +5,22 @@ import useSocket from "./useSocket"; // Hook personalizado para conectar a un so
 function SingleSocket({ speciality, onMessage, registerSendMessage }) {
   const { data, sendMessage } = useSocket(`ExternalConsultationArrival_${speciality}`);
 
+  // Ref para mantener la referencia actualizada a onMessage
+  const latestOnMessage = useRef(onMessage);
+
+  // Actualiza la referencia cada vez que onMessage cambia
+  useEffect(() => {
+    latestOnMessage.current = onMessage;
+  }, [onMessage]);
+
+  // Ejecuta onMessage cuando llega data nueva, usando la referencia más reciente
   useEffect(() => {
     if (data) {
-      onMessage(data);
+      latestOnMessage.current(data);
     }
-  }, [data, onMessage]);
+  }, [data]);
 
+  // Registrar la función sendMessage para esta especialidad
   useEffect(() => {
     if (sendMessage) {
       registerSendMessage(speciality, sendMessage);
@@ -26,7 +36,7 @@ function MultiSocketComponents({ specialities, onMessage, registerSendMessage })
     <>
       {specialities.map((spec) => (
         <SingleSocket
-          key={spec}
+          key={`${spec}`} // Puedes agregar más info aquí si necesitas forzar recreación
           speciality={spec}
           onMessage={onMessage}
           registerSendMessage={registerSendMessage}
@@ -41,12 +51,12 @@ export default function useMultiSocket(specialities = [], onMessages) {
   const [allMessages, setAllMessages] = useState({});
   const sendMessageMap = useRef({}); // Map de funciones sendMessage
 
-  // Registrar una función sendMessage
+  // Registrar una función sendMessage para cada especialidad
   const registerSendMessage = useCallback((speciality, fn) => {
     sendMessageMap.current[speciality] = fn;
   }, []);
 
-  // Enviar mensaje a una especialidad específica
+  // Función para enviar mensaje a especialidad específica
   const sendMessage = useCallback((speciality, message) => {
     const fn = sendMessageMap.current[speciality];
     if (fn) {

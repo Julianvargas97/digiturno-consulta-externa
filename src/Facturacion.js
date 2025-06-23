@@ -33,10 +33,10 @@ const MODULOS = [
   { moduleName: "MODULO_2", availableSpecialities: ["ATENCION_GENERAL", "SOAT", "ARL"] },
   { moduleName: "MODULO_3", availableSpecialities: ["FACTURACION_DIGITAL", "POSTQUIRURGICOS", "ATENCION_GENERAL"] },
   { moduleName: "MODULO_4", availableSpecialities: ["ATENCION_GENERAL"] },
-  { moduleName: "MODULO_5", availableSpecialities: ["MEDICINA_PREPAGADA", "PREPARACIONES_MAGISTRALES", "INFUSIONES", "RECAUDOS", "QR"] },
+  { moduleName: "MODULO_5", availableSpecialities: ["MEDICINA_PREPAGADA", "PREPARACIONES_MAGISTRALES", "INFUSIONES", "RECAUDOS", "QR", "ATENCION_GENERAL"] },
   { moduleName: "MODULO_6", availableSpecialities: ["ATENCION_GENERAL", "CURACIONES"] },
-  { moduleName: "MODULO_7", availableSpecialities: ["LABORATORIOS", "ATENCION_PREFERENCIAL"] },
-  { moduleName: "MODULO_8", availableSpecialities: ["ATENCION_PREFERENCIAL", "ONCOLOGIA"] },
+  { moduleName: "MODULO_7", availableSpecialities: ["LABORATORIOS", "ATENCION_PREFERENCIAL","ATENCION_GENERAL"] },
+  { moduleName: "MODULO_8", availableSpecialities: ["ATENCION_PREFERENCIAL", "ONCOLOGIA","ATENCION_GENERAL"] },
   { moduleName: "MODULO_9", availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"] },
   { moduleName: "MODULO_10", availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"] },
   { moduleName: "MODULO_11", availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"] },
@@ -128,13 +128,14 @@ function Facturacion() {
   async function cargarTurnosIniciales() {
     try {
       console.log(moduloSeleccionado)
-      const url = `${API_BASE_URL}/module/${encodeURIComponent(moduloSeleccionado.moduleName)}`;
+      const url = `${API_BASE_URL}/appointments`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Error al cargar turnos");
       const data = await res.json();
       console.log("Respuesta de la API:", data)
-      if (data && Array.isArray(data.currentAppointments)) {
-      setTurnos(data.currentAppointments);
+      if (data && Array.isArray(data)) {
+        console.log(data)
+      setTurnos(data);
       } else {
      setTurnos([]);
       toast.error("No se encontraron citas actuales para este módulo.");
@@ -154,37 +155,38 @@ function Facturacion() {
 
 
 
+  
 
-  const onMessages = useCallback((allMessages) => {
-    if (!moduloSeleccionado) return;
 
-    let mensajes = [];
-    if (Array.isArray(allMessages)) {
-      mensajes = allMessages.flat(Infinity);
-    }
 
-    mensajes
-      .filter((msg) =>
-        msg &&
-        msg.attentionModule &&
-        msg.attentionModule.trim().toLowerCase() === moduloSeleccionado.moduleName.trim().toLowerCase()
-      )
-      .forEach((msg) => {
-        try {
-          const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
-          if (parsed && parsed.id) {
-            setTurnos((prevTurnos) => {
-              if (!prevTurnos.some((t) => t.id === parsed.id)) {
-                return [...prevTurnos, parsed];
-              }
-              return prevTurnos;
-            });
-          }
-        } catch (err) {
-          console.error("Error procesando mensaje:", err);
+ const onMessages = useCallback((allMessages) => {
+  const modulo = moduloSeleccionado?.moduleName?.trim().toLowerCase();
+  if (!modulo) return;
+
+  let mensajes = [];
+  if (Array.isArray(allMessages)) {
+    mensajes = allMessages.flat(Infinity);
+  }
+
+  mensajes.forEach((msg) => {
+    const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
+    if (
+      parsed &&
+      parsed.id &&
+      parsed.attentionModule &&
+      parsed.attentionModule.trim().toLowerCase() === modulo
+    ) {
+      setTurnos((prevTurnos) => {
+        if (!prevTurnos.some((t) => t.id === parsed.id)) {
+          return [...prevTurnos, parsed];
         }
+        return prevTurnos;
       });
-  }, [moduloSeleccionado]);
+    }
+  });
+}, [moduloSeleccionado?.moduleName]);
+
+
 
   const { sendMessage, MultiSocketComponents } = useMultiSocket(
     moduloSeleccionado?.availableSpecialities || [],
@@ -216,13 +218,16 @@ function Facturacion() {
       return;
     }
     try {
+      const data = JSON.stringify({
+          appointmentId: appointment.patientId,
+          moduleName: moduloSeleccionado.moduleName.replace(/\D/g, ""),
+        })
+
+        console.log(data)
       const response = await fetch(`${API_BASE_URL}/announce-to-billing`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...appointment,
-          attentionModule: moduloSeleccionado.moduleName.replace(/\D/g, ""),
-        }),
+        body: data,
       });
       if (!response.ok) throw new Error("Error al enviar la llamada");
       toast.success(`Llamando a ${appointment.patientName || "Paciente"} - Turno: ${appointment.turn}`);
@@ -328,21 +333,46 @@ function Facturacion() {
     }
   };
 
-  const turnosFiltrados = turnos.filter((turno) => {
+
+
+
+
+
+const turnosFiltrados = turnos
+  .filter((turno) => {
     const filtroLower = filtro.toLowerCase();
-    return (
-      (turno.patientName && turno.patientName.toLowerCase().includes(filtroLower)) ||
-      (turno.nombre && turno.nombre.toLowerCase().includes(filtroLower)) ||
-      (turno.patientId && turno.patientId.toLowerCase().includes(filtroLower)) ||
-      (turno.speciality && turno.speciality.toLowerCase().includes(filtroLower))
-    );
+
+    const especialidadOk =
+      moduloSeleccionado?.availableSpecialities.includes(turno.speciality);
+
+    const busca =
+      turno.patientName?.toLowerCase().includes(filtroLower) ||
+      turno.nombre?.toLowerCase().includes(filtroLower) ||
+      turno.patientId?.toLowerCase().includes(filtroLower) ||
+      formatearEspecialidad(turno.speciality)?.toLowerCase().includes(filtroLower);
+
+    return especialidadOk && busca;
+  })
+  .sort((a, b) => {
+    if (a.speciality === "ATENCION_PREFERENCIAL" && b.speciality !== "ATENCION_PREFERENCIAL") return -1;
+    if (b.speciality === "ATENCION_PREFERENCIAL" && a.speciality !== "ATENCION_PREFERENCIAL") return 1;
+    return 0;
   });
+
+
+
 
   if (!moduloSeleccionado) {
     return (
       <div className="facturacion-container" style={{ textAlign: "center" }}>
         <h1>Seleccione su Módulo</h1>
         <ul style={{ listStyle: "none", padding: 0, maxWidth: 400, margin: "30px auto" }}>
+
+
+
+
+
+
 
 
 
@@ -441,18 +471,20 @@ function Facturacion() {
               </td>
             </tr>
           ) : (
-            turnosFiltrados
-              .filter((p) => p.attentionModule && p.attentionModule.trim().toLowerCase() === moduloSeleccionado.moduleName.trim().toLowerCase())
-              .map((turno) => (
+            turnosFiltrados.map((turno) => (
                 <tr
-                  key={turno.id}
-                  className={nuevosTurnos.includes(turno.id) ? "turno-nuevo" : ""}
-                >
+              key={turno.id}
+              className={`${nuevosTurnos.includes(turno.id) ? "turno-nuevo" : ""} ${turno.speciality === "ATENCION_PREFERENCIAL" ? "turno-preferencial" : ""}`}
+              style={turno.speciality === "ATENCION_PREFERENCIAL" ? { backgroundColor: "#rgba(220, 53, 69, 0.3)", color: "white", fontWeight: "bold" } : {}}
+              >
+  
                   <td>{turno.turn || "-"}</td>
                   <td>{turno.patientName || turno.nombre || "-"}</td>
                   <td>{turno.patientId || "-"}</td>
-                  <td>{turno.speciality || "-"}</td>
-                  <td style={{ textAlign: "center" }}>
+                  <td>
+                  {especialidadIconos[turno.speciality] || null} {formatearEspecialidad(turno.speciality) || "-"}
+                  </td>                 
+                   <td style={{ textAlign: "center" }}>
                    {turno.arrivalTime ? turno.arrivalTime.slice(0, 5) : "-"}
                   </td> 
                   <td>

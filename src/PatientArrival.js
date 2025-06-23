@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import useSocket, { DestSocket } from "./useSocket";
 import "./PatientArrival.css";
 
-export const API_BASE_URL = "http://192.168.17.236:5000/api/external-consultation";
+export const API_BASE_URL = "http://192.168.137.155:5000/api/external-consultation";
 
 function PatientArrival() {
   const [paciente, setPaciente] = useState({

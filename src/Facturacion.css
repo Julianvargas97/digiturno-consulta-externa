@@ -569,3 +569,9 @@ td:last-child {
   flex-wrap: wrap;
   gap: 10px;
 }
+
+
+.turno-preferencial {
+  background-color: rgba(220, 53, 69, 0.7); /* un rojo clarito */
+  font-weight: bold;
+}
