@@ -125,37 +125,33 @@ function Facturacion() {
   useEffect(() => {
   if (!moduloSeleccionado) return;
 
-  async function cargarTurnosIniciales() {
+  const cargarTurnosContinuamente = async () => {
     try {
-      console.log(moduloSeleccionado)
       const url = `${API_BASE_URL}/appointments`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Error al cargar turnos");
       const data = await res.json();
-      console.log("Respuesta de la API:", data)
-      if (data && Array.isArray(data)) {
-        console.log(data)
-      setTurnos(data);
-      } else {
-     setTurnos([]);
-      toast.error("No se encontraron citas actuales para este módulo.");
-    }
+      if (!Array.isArray(data)) return;
 
-      setNuevosTurnos([]);
+      setTurnos(prev => {
+        const nuevos = data.filter(nuevo => !prev.some(p => p.id === nuevo.id));
+        return [...prev, ...nuevos]; 
+      });
+
     } catch (error) {
-      console.error(error);
-      toast.error("No se pudieron cargar los turnos al iniciar.");
+      console.error("Error al recargar turnos automáticamente:", error);
     }
-  }
+  };
 
-  cargarTurnosIniciales();
+  const intervalId = setInterval(cargarTurnosContinuamente, 3000); 
+  cargarTurnosContinuamente();
+ 
+  return () => clearInterval(intervalId);
+
 }, [moduloSeleccionado]);
 
 
 
-
-
-  
 
 
 
@@ -193,24 +189,33 @@ function Facturacion() {
     onMessages
   );
 
-   useEffect(() => {
-    if (turnos.length === 0) return;
 
-    setNuevosTurnos((prevNuevos) => {
-      const nuevosIds = [];
 
-      turnos.forEach((t) => {
-        if (!notifiedTurnosRef.current.has(t.id)) {
-          toast.info(`Nuevo turno: ${t.patientName || t.nombre || "Paciente"}`);
-          notifiedTurnosRef.current.add(t.id);  // <-- Guardamos que ya notificamos este turno
-          nuevosIds.push(t.id);
-        }
-      });
 
-      if (nuevosIds.length === 0) return prevNuevos;
-      return [...prevNuevos, ...nuevosIds];
-    });
-  }, [turnos]);
+  useEffect(() => {
+  if (turnos.length === 0) return;
+
+  const nuevosTurnos = turnos.filter(t => !notifiedTurnosRef.current.has(t.id));
+  if (nuevosTurnos.length === 0) return;
+
+  // Marcar como notificados todos de una vez
+  nuevosTurnos.forEach(t => notifiedTurnosRef.current.add(t.id));
+
+  setNuevosTurnos(prev => [...prev, ...nuevosTurnos.map(t => t.id)]);
+
+  if (nuevosTurnos.length === 1) {
+    toast.info(`Nuevo turno: ${nuevosTurnos[0].patientName || nuevosTurnos[0].nombre || "Paciente"}`);
+  } else {
+    toast.info(`${nuevosTurnos.length} nuevos turnos recibidos`);
+  }
+}, [turnos]);
+
+
+
+
+
+
+
 
   const enviarLlamada = async (appointment) => {
     if (!moduloSeleccionado) {
