@@ -122,6 +122,11 @@ function Facturacion() {
 
  
  
+
+  //NUEVAS MEJORAS PARA LOS MODULOS DE RECARGAR
+
+
+  
   useEffect(() => {
   if (!moduloSeleccionado) return;
 
@@ -522,3 +527,4 @@ const turnosFiltrados = turnos
 }
 
 export default Facturacion;
+
