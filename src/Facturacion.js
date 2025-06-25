@@ -126,7 +126,7 @@ function Facturacion() {
   //NUEVAS MEJORAS PARA LOS MODULOS DE RECARGAR
 
 
-  
+
   useEffect(() => {
   if (!moduloSeleccionado) return;
 
@@ -200,13 +200,21 @@ function Facturacion() {
   useEffect(() => {
   if (turnos.length === 0) return;
 
+
+    // Filtrar turnos que aún no se han notificado
+
   const nuevosTurnos = turnos.filter(t => !notifiedTurnosRef.current.has(t.id));
   if (nuevosTurnos.length === 0) return;
 
   // Marcar como notificados todos de una vez
   nuevosTurnos.forEach(t => notifiedTurnosRef.current.add(t.id));
 
+    // Actualizar el estado de nuevos turnos (por si lo usas para marcar visualmente)
+
   setNuevosTurnos(prev => [...prev, ...nuevosTurnos.map(t => t.id)]);
+
+
+    // Mostrar notificación agrupada
 
   if (nuevosTurnos.length === 1) {
     toast.info(`Nuevo turno: ${nuevosTurnos[0].patientName || nuevosTurnos[0].nombre || "Paciente"}`);
