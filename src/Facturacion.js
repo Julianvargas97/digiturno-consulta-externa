@@ -165,7 +165,7 @@
     const toastIdRef = useRef(null);
     const nuevosAcumuladosRef = useRef([]);
 
-    //ACTUALIZACION DE VISTA CADA 3 SEGUNDOS
+    //ACTUALIZACION DE VISTA CADA 2 SEGUNDOS
 
     useEffect(() => {
       if (!moduloSeleccionado) return;
