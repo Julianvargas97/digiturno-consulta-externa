@@ -26,68 +26,66 @@
   import { API_BASE_URL } from "./PatientArrival";
   import Swal from "sweetalert2";
 
+  const allSpe = [
+      "ATENCION_GENERAL",
+      "SOAT",
+      "ARL",
+      "FACTURACION_DIGITAL",
+      "POSTQUIRURGICOS",
+      "MEDICINA_PREPAGADA",
+      "PREPARACIONES_MAGISTRALES",
+      "INFUSIONES",
+      "RECAUDOS",
+      "QR",
+      "CURACIONES",
+      "LABORATORIOS",
+      "ATENCION_PREFERENCIAL",
+      "ONCOLOGIA",
+    ]
+
   const MODULOS = [
     { moduleName: "MODULO_0", availableSpecialities: ["CIRUGIA_PROGRAMADA"] },
     { moduleName: "MODULO_1", availableSpecialities: ["SOAT", "ARL"] },
     {
       moduleName: "MODULO_2",
-      availableSpecialities: ["ATENCION_GENERAL", "SOAT", "ARL"],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_3",
-      availableSpecialities: [
-        "FACTURACION_DIGITAL",
-        "POSTQUIRURGICOS",
-        "ATENCION_GENERAL",
-      ],
+      availableSpecialities: allSpe,
     },
-    { moduleName: "MODULO_4", availableSpecialities: ["ATENCION_GENERAL"] },
+    { moduleName: "MODULO_4", availableSpecialities: allSpe },
     {
       moduleName: "MODULO_5",
-      availableSpecialities: [
-        "MEDICINA_PREPAGADA",
-        "PREPARACIONES_MAGISTRALES",
-        "INFUSIONES",
-        "RECAUDOS",
-        "QR",
-        "ATENCION_GENERAL",
-      ],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_6",
-      availableSpecialities: ["ATENCION_GENERAL", "CURACIONES"],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_7",
-      availableSpecialities: [
-        "LABORATORIOS",
-        "ATENCION_PREFERENCIAL",
-        "ATENCION_GENERAL",
-      ],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_8",
-      availableSpecialities: [
-        "ATENCION_PREFERENCIAL",
-        "ONCOLOGIA",
-        "ATENCION_GENERAL",
-      ],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_9",
-      availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_10",
-      availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_11",
-      availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"],
+      availableSpecialities: allSpe,
     },
     {
       moduleName: "MODULO_12",
-      availableSpecialities: ["ATENCION_PREFERENCIAL", "ATENCION_GENERAL"],
+      availableSpecialities: allSpe,
     },
   ];
 
@@ -186,7 +184,7 @@
         }
       };
 
-      const intervalId = setInterval(cargarTurnosContinuamente, 3000);
+      const intervalId = setInterval(cargarTurnosContinuamente, 2000);
       cargarTurnosContinuamente();
 
       return () => clearInterval(intervalId);
