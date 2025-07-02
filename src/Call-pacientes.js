@@ -43,14 +43,14 @@ const frases = [
         </a>
       </div>
     ),
-    estiloLogo: { maxHeight: "400px", maxWidth: "90%", marginTop: "30px" },
-    estiloTexto: { fontSize: "1rem", marginTop: "10px" },
+    estiloLogo: { maxHeight: "200px", maxWidth: "90%", marginTop: "30px" },
+    estiloTexto: { fontSize: "0.8rem", marginTop: "8px" },
   },
   {
     logo: Facturacion,
     titulo: "",
     subtitulo: "",
-    estiloLogo: { maxHeight: "720px", maxWidth: "auto", marginTop: "0px" },
+    estiloLogo: { maxHeight: "400px", maxWidth: "auto", marginTop: "0px" },
   }
 ];
 
@@ -146,7 +146,7 @@ function CallPacientes() {
       };
 
       // Texto que se va a reproducir en la síntesis
-      const mensaje = `${data.patientName} con Turno ${data.turn}, por favor dirigirse al modulo ${data.attentionModule.replace("_", " ")}`;
+      const mensaje = `${data.patientName} , por favor dirigirse al modulo ${data.attentionModule.replace("_", " ")}`;
 
       // Reproducimos con control de cola
       reproducirMensaje(mensaje);
