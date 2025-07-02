@@ -9,22 +9,6 @@ export const DestSocket = {
   ARRIVAL_CALL: 'ARRIVAL_CALL',
   DELIVER: 'DELIVER',
   ANNOUNCE_TO_BILLING: 'ANNOUNCE_TO_BILLING',
-  ExternalConsultationArrival_QR: 'ExternalConsultationArrival_QR',
-  ExternalConsultationArrival_CIRUGIA_PROGRAMADA: 'ExternalConsultationArrival_CIRUGIA_PROGRAMADA',
-  ExternalConsultationArrival_SOAT: 'ExternalConsultationArrival_SOAT',
-  ExternalConsultationArrival_ARL: 'ExternalConsultationArrival_ARL',
-  ExternalConsultationArrival_GENERAL: 'ExternalConsultationArrival_GENERAL',
-  ExternalConsultationArrival_MEDICINA_PREPAGADA: 'ExternalConsultationArrival_MEDICINA_PREPAGADA',
-  ExternalConsultationArrival_PRUEBAS_MAGISTRALES: 'ExternalConsultationArrival_PRUEBAS_MAGISTRALES',
-  ExternalConsultationArrival_INFUSIONES: 'ExternalConsultationArrival_INFUSIONES',
-  ExternalConsultationArrival_RECAUDOS: 'ExternalConsultationArrival_RECAUDOS',
-  ExternalConsultationArrival_CURACIONES: 'ExternalConsultationArrival_CURACIONES',
-  ExternalConsultationArrival_LABORATORIOS: 'ExternalConsultationArrival_LABORATORIOS',
-  ExternalConsultationArrival_ATENCION_PREFERENCIAL: 'ExternalConsultationArrival_ATENCION_PREFERENCIAL',
-  ExternalConsultationArrival_ONCOLOGIA: 'ExternalConsultationArrival_ONCOLOGIA',
-  ExternalConsultationArrival_CHATBOT: 'ExternalConsultationArrival_CHATBOT',
-  ExternalConsultationArrival_POSTQUIRURGICO: 'ExternalConsultationArrival_POSTQUIRURGICO',
-  ExternalConsultationArrival_APOYO: 'ExternalConsultationArrival_APOYO',
   ExternalConsultationArrival_ANOUNCETOBILLING: 'ExternalConsultationArrival_ANOUNCETOBILLING',
 };
 
@@ -36,27 +20,11 @@ const topicRoutes = {
   [DestSocket.ARRIVAL_CALL]: '/topic/arrivalcall',
   [DestSocket.DELIVER]: '/topic/deliver_results',
   [DestSocket.ANNOUNCE_TO_BILLING]: '/topic/announce-to-billing',
-  [DestSocket.ExternalConsultationArrival_QR]: '/topic/external-consultation/arrival-confirmation/QR',
-  [DestSocket.ExternalConsultationArrival_CIRUGIA_PROGRAMADA]: '/topic/external-consultation/arrival-confirmation/CIRUGIA_PROGRAMADA',
-  [DestSocket.ExternalConsultationArrival_SOAT]: '/topic/external-consultation/arrival-confirmation/SOAT',
-  [DestSocket.ExternalConsultationArrival_ARL]: '/topic/external-consultation/arrival-confirmation/ARL',
-  [DestSocket.ExternalConsultationArrival_GENERAL]: '/topic/external-consultation/arrival-confirmation/GENERAL',
-  [DestSocket.ExternalConsultationArrival_MEDICINA_PREPAGADA]: '/topic/external-consultation/arrival-confirmation/MEDICINA_PREPAGADA',
-  [DestSocket.ExternalConsultationArrival_PRUEBAS_MAGISTRALES]: '/topic/external-consultation/arrival-confirmation/PRUEBAS_MAGISTRALES',
-  [DestSocket.ExternalConsultationArrival_INFUSIONES]: '/topic/external-consultation/arrival-confirmation/INFUSIONES',
-  [DestSocket.ExternalConsultationArrival_RECAUDOS]: '/topic/external-consultation/arrival-confirmation/RECAUDOS',
-  [DestSocket.ExternalConsultationArrival_CURACIONES]: '/topic/external-consultation/arrival-confirmation/CURACIONES',
-  [DestSocket.ExternalConsultationArrival_LABORATORIOS]: '/topic/external-consultation/arrival-confirmation/LABORATORIOS',
-  [DestSocket.ExternalConsultationArrival_ATENCION_PREFERENCIAL]: '/topic/external-consultation/arrival-confirmation/ATENCION_PREFERENCIAL',
-  [DestSocket.ExternalConsultationArrival_ONCOLOGIA]: '/topic/external-consultation/arrival-confirmation/ONCOLOGIA',
-  [DestSocket.ExternalConsultationArrival_CHATBOT]: '/topic/external-consultation/arrival-confirmation/CHATBOT',
-  [DestSocket.ExternalConsultationArrival_POSTQUIRURGICO]: '/topic/external-consultation/arrival-confirmation/POSTQUIRURGICO',
-  [DestSocket.ExternalConsultationArrival_APOYO]: '/topic/external-consultation/arrival-confirmation/APOYO',
   [DestSocket.ExternalConsultationArrival_ANOUNCETOBILLING]: '/topic/external-consultation/announce-to-billing',
 };
 
 // URL del servidor WebSocket
-const url = 'ws://192.168.137.155:5000/websocket';
+const url = 'ws://192.168.17.236:5000/websocket';
 
 // Hook personalizado para manejar la conexión WebSocket
 const useSocket = (destSocket) => {
@@ -81,6 +49,8 @@ const useSocket = (destSocket) => {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
+
+    console.log('CLIENT',client);
 
     client.onConnect = () => {
       console.log('Conectado al servidor WebSocket ------->', memoDestSocket);
