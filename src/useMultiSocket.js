@@ -3,7 +3,7 @@ import useSocket from "./useSocket"; // Hook personalizado para conectar a un so
 
 // Componente interno que se encarga de conectar a una especialidad
 function SingleSocket({ speciality, onMessage, registerSendMessage }) {
-  const { data, sendMessage } = useSocket(`ExternalConsultationArrival_${speciality}`);
+  const { data, sendMessage } = useSocket(`ARRIVAL`);
 
   // Ref para mantener la referencia actualizada a onMessage
   const latestOnMessage = useRef(onMessage);
