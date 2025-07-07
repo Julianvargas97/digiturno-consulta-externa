@@ -100,7 +100,7 @@ tbody tr:hover {
   100% { background-color: #fdfefe; box-shadow: none; }
 }
 
-.btn-llamar, .btn-eliminar {
+.btn-llamar, .btn-eliminar, .btn-tamizaje {
   border: none;
   padding: 8px 18px;
   border-radius: 8px;
@@ -117,6 +117,11 @@ tbody tr:hover {
   gap: 6px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.12);
   white-space: nowrap;
+}
+
+.btn-tamizaje {
+  background-color: #4897E8;
+  color: white;
 }
 
 .btn-llamar {
