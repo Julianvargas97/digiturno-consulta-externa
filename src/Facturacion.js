@@ -313,13 +313,14 @@ function Facturacion() {
   const manejarEliminar = async (id) => {
     if (!window.confirm("¿Seguro que quieres eliminar este turno?")) return;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/unattend-patient/${id}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/unattend-patient`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentId: id,
+          moduleName: moduloSeleccionado.moduleName,
+        }),
+      });
       if (!response.ok) throw new Error("Error al eliminar la cita");
 
       setTurnos((prev) => prev.filter((turno) => turno.id !== id));
