@@ -9,7 +9,7 @@ const client = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
-export const API_BASE_URL = "http://localhost:5000/api/external-consultation";
+export const API_BASE_URL = "http://192.168.10.203:5000/api/external-consultation";
 
 function PatientArrival() {
   const [paciente, setPaciente] = useState({

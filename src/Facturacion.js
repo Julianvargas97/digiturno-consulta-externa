@@ -264,9 +264,8 @@ function Facturacion() {
     const totalNuevos = nuevosAcumuladosRef.current.length;
     const mensaje =
       totalNuevos === 1
-        ? `Nuevo turno: ${
-            nuevosAcumuladosRef.current[0].patientName || "Paciente"
-          }`
+        ? `Nuevo turno: ${nuevosAcumuladosRef.current[0].patientName || "Paciente"
+        }`
         : `${totalNuevos} nuevos turnos recibidos`;
 
     toastIdRef.current = toast.info(mensaje, {
@@ -277,7 +276,7 @@ function Facturacion() {
       },
     });
 
-    // Opcional: actualizar estado para marcar visualmente
+    // actualizar estado para marcar visualmente
     setNuevosTurnos((prev) => [...prev, ...nuevos.map((t) => t.id)]);
   }, [turnos]);
 
@@ -300,8 +299,7 @@ function Facturacion() {
       });
       if (!response.ok) throw new Error("Error al enviar la llamada");
       toast.success(
-        `Llamando a ${appointment.patientName || "Paciente"} - Turno: ${
-          appointment.turn
+        `Llamando a ${appointment.patientName || "Paciente"} - Turno: ${appointment.turn
         }`
       );
     } catch (err) {
@@ -557,20 +555,18 @@ function Facturacion() {
             turnosFiltrados.map((turno) => (
               <tr
                 key={turno.id}
-                className={`${
-                  nuevosTurnos.includes(turno.id) ? "turno-nuevo" : ""
-                } ${
-                  turno.speciality === "ATENCION_PREFERENCIAL"
+                className={`${nuevosTurnos.includes(turno.id) ? "turno-nuevo" : ""
+                  } ${turno.speciality === "ATENCION_PREFERENCIAL"
                     ? "turno-preferencial"
                     : ""
-                }`}
+                  }`}
                 style={
                   turno.speciality === "ATENCION_PREFERENCIAL"
                     ? {
-                        backgroundColor: "rgba(220, 53, 69, 0.3)",
-                        color: "white",
-                        fontWeight: "bold",
-                      }
+                      backgroundColor: "rgba(179, 21, 21, 0.3)",
+                      color: "black",
+                      fontWeight: "500",
+                    }
                     : {}
                 }
               >
@@ -581,9 +577,20 @@ function Facturacion() {
                   {especialidadIconos[turno.speciality] || null}{" "}
                   {formatearEspecialidad(turno.speciality) || "-"}
                 </td>
-                <td style={{ textAlign: "center" }}>
-                  {turno.arrivalTime ? turno.arrivalTime.slice(0, 5) : "-"}
+                <td className="fecha-hora-pequena" style={{ textAlign: "center" }}>
+                  {turno.arrivalTime
+                    ? new Date(turno.arrivalTime).toLocaleString("es-CO", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                    : "-"}
                 </td>
+
+
                 <td>
                   <button
                     className="btn-eliminar"

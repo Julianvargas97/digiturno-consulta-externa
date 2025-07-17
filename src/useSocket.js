@@ -24,7 +24,7 @@ const topicRoutes = {
 };
 
 // URL del servidor WebSocket
-const url = 'ws://localhost:5000/websocket';
+const url = 'ws://192.168.10.203:5000/websocket';
 
 // Hook personalizado para manejar la conexión WebSocket
 const useSocket = (destSocket) => {
